@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { LessonServices } from "./lesson.service";
 import sendResponse from "../../utils/sendResponse";
-import { HttpStatus } from "http-status-ts";
+import { StatusCodes } from "http-status-codes";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
 import catchAsync from "../../utils/catchAsync";
 import AppError from "../../Error/AppError";
@@ -9,7 +9,7 @@ import logger from "../../utils/logger";
 
 const createLesson = catchAsync(async (req: Request, res: Response) => {
   if (!req.user) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, 'User not authenticated');
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
   }
 
   let coverImageUrl = '';
@@ -54,7 +54,7 @@ const createLesson = catchAsync(async (req: Request, res: Response) => {
   };
   
   sendResponse(res, {
-    statusCode: HttpStatus.CREATED,
+    statusCode: StatusCodes.CREATED,
     success: true,
     message: result.isPublished ? "Lesson created and audio generation started" : "Lesson created successfully",
     data: responseData,
@@ -76,7 +76,7 @@ const getAllLessons = catchAsync(async (req: Request, res: Response) => {
   res.set('X-Page-Count', String(result.meta.totalPages));
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Lessons fetched successfully",
     data: lessonsWithAudio,
@@ -119,7 +119,7 @@ const updateLesson = catchAsync(async (req: Request, res: Response) => {
   };
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Lesson updated successfully",
     data: responseData,
@@ -132,7 +132,7 @@ const deleteLesson = catchAsync(async (req: Request, res: Response) => {
   const result = await LessonServices.deleteLessonFromDB(lessonId);
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Lesson deleted successfully",
     data: result,
@@ -145,11 +145,11 @@ const getLessonById = catchAsync(async (req: Request, res: Response) => {
   const result = await LessonServices.getLessonByIdFromDB(lessonId);
   
   if (!result) {
-    throw new AppError(HttpStatus.NOT_FOUND, 'Lesson not found');
+    throw new AppError(StatusCodes.NOT_FOUND, 'Lesson not found');
   }
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Lesson fetched successfully",
     data: result,
@@ -162,7 +162,7 @@ const regenerateAudio = catchAsync(async (req: Request, res: Response) => {
   const result = await LessonServices.regenerateAudioForLesson(lessonId);
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: "Audio regeneration started",
     data: result,

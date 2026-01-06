@@ -1,4 +1,4 @@
-import { HttpStatus } from 'http-status-ts';
+import { StatusCodes } from 'http-status-codes';
 import AppError from '../../Error/AppError';
 import { Lesson } from '../lesson/lesson.model';
 import { IVocab } from './vocab.interface';
@@ -14,7 +14,7 @@ const addVocabToDB = async (payload: IVocab) => {
 
     // Check 1: Does the lesson exist?
     if (!lesson) {
-      throw new AppError(HttpStatus.NOT_FOUND, "The associated lesson does not exist.");
+      throw new AppError(StatusCodes.NOT_FOUND, "The associated lesson does not exist.");
     }
 
     // Check 2: (Optional/Strict) Is the word actually in the content?
@@ -23,7 +23,7 @@ const addVocabToDB = async (payload: IVocab) => {
     const wordLower = payload.word.toLowerCase();
 
     if (!contentLower.includes(wordLower)) {
-       throw new AppError(HttpStatus.BAD_REQUEST, "This word does not appear in the specified lesson.");
+       throw new AppError(StatusCodes.BAD_REQUEST, "This word does not appear in the specified lesson.");
     }
   }
   

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import config from '../../config';
 import AppError from '../../Error/AppError';
-import { HttpStatus } from 'http-status-ts';
+import { StatusCodes } from 'http-status-codes';
 import { azureBlobService } from '../../services/azureBlobStorage.service';
 import logger from '../../utils/logger';
 import {
@@ -20,7 +20,7 @@ export class AzureTTSService {
     if (!this.speechConfig) {
       if (!config.azure.speech.key || !config.azure.speech.region) {
         throw new AppError(
-          HttpStatus.INTERNAL_SERVER_ERROR,
+          StatusCodes.INTERNAL_SERVER_ERROR,
           'Azure Speech Services configuration is missing'
         );
       }
@@ -93,14 +93,14 @@ export class AzureTTSService {
                 });
               } catch (uploadError) {
                 reject(new AppError(
-                  HttpStatus.INTERNAL_SERVER_ERROR,
+                  StatusCodes.INTERNAL_SERVER_ERROR,
                   `Failed to upload audio to blob storage: ${uploadError}`
                 ));
               }
             } else {
               synthesizer.close();
               reject(new AppError(
-                HttpStatus.BAD_REQUEST,
+                StatusCodes.BAD_REQUEST,
                 `Speech synthesis failed: ${result.errorDetails}`
               ));
             }
@@ -108,7 +108,7 @@ export class AzureTTSService {
           (error) => {
             synthesizer.close();
             reject(new AppError(
-              HttpStatus.INTERNAL_SERVER_ERROR,
+              StatusCodes.INTERNAL_SERVER_ERROR,
               `Speech synthesis error: ${error}`
             ));
           }
@@ -116,7 +116,7 @@ export class AzureTTSService {
       });
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Azure TTS Error: ${error}`
       );
     }

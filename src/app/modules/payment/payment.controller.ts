@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { HttpStatus } from 'http-status-ts';
+import { StatusCodes } from 'http-status-codes';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
 import AppError from '../../Error/AppError';
@@ -17,23 +17,23 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
   const { plan } = req.body; // monthly, yearly, or lifetime
   
   if (!userId) {
-    throw new AppError(HttpStatus.UNAUTHORIZED, 'User not authenticated');
+    throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
   }
 
   if (!plan) {
-    throw new AppError(HttpStatus.BAD_REQUEST, 'Subscription plan is required');
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Subscription plan is required');
   }
 
   // Get plan details
   const selectedPlan = getPlanByName(plan);
   if (!selectedPlan) {
-    throw new AppError(HttpStatus.BAD_REQUEST, 'Invalid subscription plan');
+    throw new AppError(StatusCodes.BAD_REQUEST, 'Invalid subscription plan');
   }
 
   // Get student details
   const student = await Student.findOne({ user: userId }).populate('user', 'name email');
   if (!student) {
-    throw new AppError(HttpStatus.NOT_FOUND, 'Student profile not found');
+    throw new AppError(StatusCodes.NOT_FOUND, 'Student profile not found');
   }
 
   // Generate unique transaction ID
@@ -86,7 +86,7 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
     });
 
     sendResponse(res, {
-      statusCode: HttpStatus.OK,
+      statusCode: StatusCodes.OK,
       success: true,
       message: 'Payment session created successfully',
       data: {
@@ -98,7 +98,7 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
       },
     });
   } else {
-    throw new AppError(HttpStatus.INTERNAL_SERVER_ERROR, 'Failed to initialize payment');
+    throw new AppError(StatusCodes.INTERNAL_SERVER_ERROR, 'Failed to initialize payment');
   }
 });
 
@@ -199,7 +199,7 @@ const paymentIPN = catchAsync(async (req: Request, res: Response) => {
   }
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'IPN received',
     data: null,

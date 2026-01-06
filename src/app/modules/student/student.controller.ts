@@ -9,7 +9,7 @@
 //     const result = await StudentServices.updateStudentIntoDB(id, req.body);
 
 //    sendResponse(res,{
-//     statusCode: HttpStatus.OK,
+//     statusCode: StatusCodes.OK,
 //     success: true,
 //     message: 'Student updated successfully',
 //     data: result,
@@ -26,14 +26,14 @@
 import { Request, Response } from 'express';
 import { StudentServices } from './student.service';
 import sendResponse from '../../utils/sendResponse';
-import { HttpStatus } from 'http-status-ts';
+import { StatusCodes } from 'http-status-codes';
 
 // Existing method (By ID)
 const updateStudent = async (req: Request, res: Response) => {
   const { id } = req.params;
   const result = await StudentServices.updateStudentIntoDB(id, req.body);
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'Student updated successfully',
     data: result,
@@ -53,7 +53,7 @@ const updateMyLevel = async (req: Request, res: Response) => {
   });
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'Level updated successfully',
     data: result,

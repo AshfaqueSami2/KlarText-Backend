@@ -3,7 +3,7 @@ import { UserServices } from "./user.service";
 import sendResponse from "../../utils/sendResponse";
 import catchAsync from "../../utils/catchAsync";
 import { uploadImageToCloudinary } from "../../utils/cloudinary";
-import { HttpStatus } from "http-status-ts";
+import { StatusCodes } from "http-status-codes";
 import logger from "../../utils/logger";
 
 const createUser = catchAsync(async (req: Request, res: Response) => {
@@ -87,7 +87,7 @@ const getMe = catchAsync(async (req: Request, res: Response) => {
   const result = await UserServices.getMe(userId, role);
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'User profile retrieved successfully',
     data: result,
@@ -120,7 +120,7 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await UserServices.updateProfile(userId, role, updateData);
 
   sendResponse(res, {
-    statusCode: HttpStatus.OK,
+    statusCode: StatusCodes.OK,
     success: true,
     message: 'Profile updated successfully',
     data: result,

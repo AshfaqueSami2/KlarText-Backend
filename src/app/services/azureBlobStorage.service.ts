@@ -1,7 +1,7 @@
 import { BlobServiceClient, ContainerClient, BlockBlobClient, BlobSASPermissions } from '@azure/storage-blob';
 import config from '../config';
 import AppError from '../Error/AppError';
-import { HttpStatus } from 'http-status-ts';
+import { StatusCodes } from 'http-status-codes';
 import logger from '../utils/logger';
 
 export class AzureBlobStorageService {
@@ -11,7 +11,7 @@ export class AzureBlobStorageService {
   constructor() {
     if (!config.azure.blob.connectionString) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         'Azure Blob Storage connection string is required'
       );
     }
@@ -25,7 +25,7 @@ export class AzureBlobStorageService {
       this.containerClient = blobServiceClient.getContainerClient(this.containerName);
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Failed to initialize Azure Blob Storage: ${error}`
       );
     }
@@ -62,7 +62,7 @@ export class AzureBlobStorageService {
       return sasUrl;
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Failed to upload audio to blob storage: ${error}`
       );
     }
@@ -107,7 +107,7 @@ export class AzureBlobStorageService {
       return sasUrl;
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Failed to generate SAS URL: ${error}`
       );
     }
@@ -123,7 +123,7 @@ export class AzureBlobStorageService {
       return await this.generateSasUrl(fileName);
     } catch (error) {
       throw new AppError(
-        HttpStatus.NOT_FOUND,
+        StatusCodes.NOT_FOUND,
         `Failed to get audio URL: ${error}`
       );
     }
@@ -151,7 +151,7 @@ export class AzureBlobStorageService {
       return Buffer.concat(chunks);
     } catch (error) {
       throw new AppError(
-        HttpStatus.NOT_FOUND,
+        StatusCodes.NOT_FOUND,
         `Failed to download audio file: ${error}`
       );
     }
@@ -190,7 +190,7 @@ export class AzureBlobStorageService {
       return fileNames;
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Failed to list audio files: ${error}`
       );
     }
@@ -221,7 +221,7 @@ export class AzureBlobStorageService {
       };
     } catch (error) {
       throw new AppError(
-        HttpStatus.INTERNAL_SERVER_ERROR,
+        StatusCodes.INTERNAL_SERVER_ERROR,
         `Failed to get storage stats: ${error}`
       );
     }
