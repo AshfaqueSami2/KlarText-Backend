@@ -115,6 +115,8 @@ const allowedOrigins = [
     'https://kalrtext.vercel.app',
     'http://localhost:3001',
     'http://localhost:5000',
+    'https://sandbox.sslcommerz.com',
+    'https://securepay.sslcommerz.com',
 ].filter(Boolean);
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {

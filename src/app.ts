@@ -116,6 +116,8 @@ const allowedOrigins = [
   'https://kalrtext.vercel.app',
   'http://localhost:3001',
   'http://localhost:5000', // Vite default
+  'https://sandbox.sslcommerz.com', // SSLCommerz Sandbox
+  'https://securepay.sslcommerz.com', // SSLCommerz Live
 ].filter(Boolean) as string[];
 
 app.use(cors({
