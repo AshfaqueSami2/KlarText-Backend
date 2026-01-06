@@ -1,0 +1,36 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.GrammarRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const grammar_controller_1 = require("./grammar.controller");
+const grammar_validation_1 = require("./grammar.validation");
+const validateRequest_1 = __importDefault(require("../../middleWares/validateRequest"));
+const auth_1 = require("../../middleWares/auth");
+const user_constant_1 = require("../user/user.constant");
+const cache_1 = require("../../middleWares/cache");
+const redis_1 = require("../../config/redis");
+const router = express_1.default.Router();
+router.get('/topics', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getAllTopics);
+router.get('/topics/:topicId', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getTopicById);
+router.post('/topics', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.createTopicSchema), grammar_controller_1.GrammarControllers.createTopic);
+router.put('/topics/:topicId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.updateTopicSchema), grammar_controller_1.GrammarControllers.updateTopic);
+router.delete('/topics/:topicId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), grammar_controller_1.GrammarControllers.deleteTopic);
+router.get('/topics/:topicId/lessons', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getLessonsByTopic);
+router.get('/lessons/:lessonId', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getLessonById);
+router.post('/lessons', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.createLessonSchema), grammar_controller_1.GrammarControllers.createLesson);
+router.put('/lessons/:lessonId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.updateLessonSchema), grammar_controller_1.GrammarControllers.updateLesson);
+router.delete('/lessons/:lessonId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), grammar_controller_1.GrammarControllers.deleteLesson);
+router.post('/lessons/:lessonId/complete', (0, auth_1.auth)(user_constant_1.USER_ROLE.STUDENT), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.updateLessonProgressSchema), grammar_controller_1.GrammarControllers.completeLessonProgress);
+router.get('/lessons/:lessonId/exercises', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getExerciseSetsByLesson);
+router.get('/exercises/:exerciseSetId', (0, auth_1.conditionalAuth)(), cache_1.cache.grammar, grammar_controller_1.GrammarControllers.getExerciseSetById);
+router.post('/exercises', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.createExerciseSetSchema), grammar_controller_1.GrammarControllers.createExerciseSet);
+router.put('/exercises/:exerciseSetId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.updateExerciseSetSchema), grammar_controller_1.GrammarControllers.updateExerciseSet);
+router.delete('/exercises/:exerciseSetId', (0, auth_1.auth)(user_constant_1.USER_ROLE.ADMIN), (0, cache_1.invalidateCache)([`${redis_1.CachePrefix.GRAMMAR}*`]), grammar_controller_1.GrammarControllers.deleteExerciseSet);
+router.post('/exercises/:exerciseSetId/submit', (0, auth_1.auth)(user_constant_1.USER_ROLE.STUDENT), (0, validateRequest_1.default)(grammar_validation_1.GrammarValidation.submitExerciseAnswersSchema), grammar_controller_1.GrammarControllers.submitExerciseAnswers);
+router.get('/progress', (0, auth_1.auth)(user_constant_1.USER_ROLE.STUDENT), grammar_controller_1.GrammarControllers.getUserProgress);
+router.get('/recommended', (0, auth_1.auth)(user_constant_1.USER_ROLE.STUDENT), grammar_controller_1.GrammarControllers.getRecommendedLesson);
+exports.GrammarRoutes = router;
+//# sourceMappingURL=grammar.route.js.map

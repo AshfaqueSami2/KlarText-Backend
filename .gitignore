@@ -9,7 +9,7 @@ package-lock.json
 .env.*.local
 
 # Build outputs
-dist/
+# dist/  # Uncommented for Vercel deployment
 build/
 *.tsbuildinfo
 
