@@ -40,7 +40,7 @@ const initPayment = (0, catchAsync_1.default)(async (req, res) => {
         amount: selectedPlan.price,
         status: 'pending'
     });
-    const backendUrl = `http://localhost:${config_1.default.port}`;
+    const backendUrl = config_1.default.backend_url;
     const paymentData = {
         total_amount: selectedPlan.price,
         currency: 'BDT',

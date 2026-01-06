@@ -21,6 +21,7 @@ declare const _default: {
         callback_url: string | undefined;
     };
     client_url: string;
+    backend_url: string;
     gemini: {
         api_key: string | undefined;
     };

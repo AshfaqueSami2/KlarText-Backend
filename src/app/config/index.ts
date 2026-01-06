@@ -25,7 +25,8 @@ export default {
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
     callback_url: process.env.GOOGLE_CALLBACK_URL,
   },
-  client_url: process.env.CLIENT_URL ,
+  client_url: process.env.CLIENT_URL || 'https://kalrtext.vercel.app',
+  backend_url: process.env.BACKEND_URL || `http://localhost:${process.env.PORT || 5000}`,
   gemini: {
     api_key: process.env.GEMINI_API_KEY,
   },

@@ -112,6 +112,7 @@ app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 app.use((0, cookie_parser_1.default)());
 const allowedOrigins = [
     config_1.default.client_url,
+    'https://kalrtext.vercel.app',
     'http://localhost:3001',
     'http://localhost:5000',
 ].filter(Boolean);

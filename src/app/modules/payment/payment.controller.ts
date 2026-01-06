@@ -50,7 +50,7 @@ const initPayment = catchAsync(async (req: Request, res: Response) => {
 
   // Prepare payment data
   // Note: Callback URLs must point to BACKEND API, not frontend
-  const backendUrl = `http://localhost:${config.port}`;
+  const backendUrl = config.backend_url;
   const paymentData = {
     total_amount: selectedPlan.price,
     currency: 'BDT',
