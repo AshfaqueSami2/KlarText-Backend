@@ -74,7 +74,6 @@
     "mongodb": "^7.0.0",
     "mongoose": "^9.0.0",
     "multer": "^2.0.2",
-    "parser": "^0.1.4",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "response-time": "^2.3.4",
