@@ -113,6 +113,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   config.client_url,
+  'https://kalrtext.vercel.app',
   'http://localhost:3001',
   'http://localhost:5000', // Vite default
 ].filter(Boolean) as string[];
