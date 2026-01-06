@@ -25,7 +25,7 @@ export default {
     client_secret: process.env.GOOGLE_CLIENT_SECRET,
     callback_url: process.env.GOOGLE_CALLBACK_URL,
   },
-  client_url: process.env.CLIENT_URL || 'http://localhost:3001',
+  client_url: process.env.CLIENT_URL ,
   gemini: {
     api_key: process.env.GEMINI_API_KEY,
   },
