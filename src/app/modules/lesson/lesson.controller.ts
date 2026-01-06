@@ -8,6 +8,10 @@ import AppError from "../../Error/AppError";
 import logger from "../../utils/logger";
 
 const createLesson = catchAsync(async (req: Request, res: Response) => {
+  if (!req.user) {
+    throw new AppError(HttpStatus.UNAUTHORIZED, 'User not authenticated');
+  }
+
   let coverImageUrl = '';
   
   // Handle cover image upload if provided

@@ -40,28 +40,33 @@ const markLessonAsComplete = async (userId: string, lessonId: string) => {
       throw new Error('Lesson not found');
     }
 
-    // 3. CHECK SUBSCRIPTION FOR PREMIUM LEVELS (B1, B2, C1, C2)
+    // 3. CHECK SUBSCRIPTION STATUS
+    const isPremium = student.subscriptionStatus === 'premium';
+    const isLifetime = student.subscriptionPlan === 'lifetime';
+    const isNotExpired = !student.subscriptionExpiry || new Date() < student.subscriptionExpiry;
+    const hasActivePremium = isPremium && (isLifetime || isNotExpired);
+
+    // 4. CHECK SUBSCRIPTION FOR PREMIUM LEVELS (B1, B2, C1, C2)
     if (PREMIUM_LEVELS.includes(lesson.difficulty)) {
-      const isPremium = student.subscriptionStatus === 'premium';
-      const isLifetime = student.subscriptionPlan === 'lifetime';
-      const isNotExpired = !student.subscriptionExpiry || new Date() < student.subscriptionExpiry;
-      
-      if (!isPremium || (!isLifetime && !isNotExpired)) {
+      if (!hasActivePremium) {
         throw new Error(
           `⭐ Premium Required: ${lesson.difficulty} lessons require a premium subscription. Upgrade to Monthly (৳399), Yearly (৳3,999), or Lifetime (৳7,999) to access B1-C2 lessons!`
         );
       }
     }
 
-    // 4. THE VALIDATION GATE (Progressive Unlock Logic)
-    const studentRank = LEVEL_HIERARCHY[student.currentLevel] || 0;
-    const lessonRank = LEVEL_HIERARCHY[lesson.difficulty] || 0;
+    // 5. THE VALIDATION GATE (Progressive Unlock Logic)
+    // Premium users can access ANY level without restrictions
+    if (!hasActivePremium) {
+      const studentRank = LEVEL_HIERARCHY[student.currentLevel] || 0;
+      const lessonRank = LEVEL_HIERARCHY[lesson.difficulty] || 0;
 
-    // Logic: If Student Rank is LOWER than Lesson Rank -> BLOCK
-    if (studentRank < lessonRank) {
-      throw new Error(
-        `Access Denied: This lesson is Level ${lesson.difficulty}. You are currently Level ${student.currentLevel}. Complete all ${student.currentLevel} lessons to unlock this level.`
-      );
+      // Logic: If Student Rank is LOWER than Lesson Rank -> BLOCK (only for free users)
+      if (studentRank < lessonRank) {
+        throw new Error(
+          `Access Denied: This lesson is Level ${lesson.difficulty}. You are currently Level ${student.currentLevel}. Complete all ${student.currentLevel} lessons to unlock this level.`
+        );
+      }
     }
 
     // 5. Check if already completed

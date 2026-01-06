@@ -25,7 +25,4 @@ export interface IPaymentInitData {
 
 export interface IPaymentValidationData {
   val_id: string;
-  store_id: string;
-  store_passwd: string;
-  format?: string;
 }
