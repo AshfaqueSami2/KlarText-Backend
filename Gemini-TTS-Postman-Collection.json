@@ -1,0 +1,278 @@
+{
+  "info": {
+    "name": "Google Gemini TTS API Testing",
+    "description": "Test Google Gemini Text-to-Speech implementation in KlarText",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "🎤 Gemini TTS Endpoints",
+      "item": [
+        {
+          "name": "1. Generate Single Text Audio (Gemini)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hallo! Willkommen zu KlarText. Wir lernen heute deutsche Grammatik.\",\n  \"voiceName\": \"Sulafat\",\n  \"language\": \"de\",\n  \"temperature\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            },
+            "description": "Generate high-quality TTS audio using Google Gemini. Returns audio file path and metadata."
+          }
+        },
+        {
+          "name": "2. Generate Text Audio (Different Voice)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Ich bin ein Deutschlehrer und helfe beim Sprachenlernen.\",\n  \"voiceName\": \"Phoebe\",\n  \"language\": \"de\",\n  \"temperature\": 0.8\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            },
+            "description": "Test different voice (Phoebe) with lower temperature for more consistent pronunciation."
+          }
+        },
+        {
+          "name": "3. Generate Lesson Audio (REPLACE lessonId)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"voiceName\": \"Sulafat\",\n  \"language\": \"de\",\n  \"chunkSize\": 300\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-lesson/REPLACE_WITH_ACTUAL_LESSON_ID",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-lesson", "REPLACE_WITH_ACTUAL_LESSON_ID"]
+            },
+            "description": "⚠️ Replace 'REPLACE_WITH_ACTUAL_LESSON_ID' with a real lesson ID. Generates audio for entire lesson in chunks."
+          }
+        },
+        {
+          "name": "4. Generate Batch Audio (Vocabulary)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"texts\": [\n    \"der Hund\",\n    \"die Katze\", \n    \"das Haus\",\n    \"der Baum\",\n    \"die Blume\"\n  ],\n  \"voiceName\": \"Aura\",\n  \"language\": \"de\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-batch",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-batch"]
+            },
+            "description": "Generate audio for multiple vocabulary words using Aura voice. Perfect for flashcards."
+          }
+        },
+        {
+          "name": "5. Get Supported Voices",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tts/voices",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "voices"]
+            },
+            "description": "Get list of all available Gemini TTS voices with descriptions."
+          }
+        },
+        {
+          "name": "6. Get Supported Languages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tts/languages",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "languages"]
+            },
+            "description": "Get list of supported languages for Gemini TTS."
+          }
+        },
+        {
+          "name": "7. Play Audio File",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tts/audio/AUDIO_FILE_NAME.wav",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "audio", "AUDIO_FILE_NAME.wav"]
+            },
+            "description": "⚠️ Replace AUDIO_FILE_NAME.wav with actual filename from generation response. Streams the audio file."
+          }
+        },
+        {
+          "name": "8. Direct Audio Access",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/../audio/gemini/AUDIO_FILE_NAME.wav",
+              "host": ["{{baseUrl}}"],
+              "path": ["..", "audio", "gemini", "AUDIO_FILE_NAME.wav"]
+            },
+            "description": "Direct access to audio files via static serving. Replace AUDIO_FILE_NAME.wav with actual filename."
+          }
+        }
+      ]
+    },
+    {
+      "name": "📋 Voice Comparison Tests",
+      "item": [
+        {
+          "name": "Test Sulafat Voice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Guten Tag, ich bin Sulafat. Ich spreche sehr natürlich.\",\n  \"voiceName\": \"Sulafat\",\n  \"language\": \"de\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            }
+          }
+        },
+        {
+          "name": "Test Phoebe Voice",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Hallo, ich bin Phoebe. Ich habe eine warme Stimme.\",\n  \"voiceName\": \"Phoebe\",\n  \"language\": \"de\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            }
+          }
+        },
+        {
+          "name": "Test Charon Voice (Male)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Guten Morgen, ich bin Charon. Ich habe eine tiefe männliche Stimme.\",\n  \"voiceName\": \"Charon\",\n  \"language\": \"de\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚠️ Error Testing",
+      "item": [
+        {
+          "name": "Test Empty Text Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"\",\n  \"voiceName\": \"Sulafat\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            },
+            "description": "Should return 400 error: Text is required"
+          }
+        },
+        {
+          "name": "Test Text Too Long Error",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"This is an extremely long text that exceeds the maximum character limit of 500 characters for Gemini TTS generation. Let me continue adding more text to make it even longer and longer and longer until it definitely exceeds the limit. This should be more than enough characters to trigger the validation error in our Gemini TTS service implementation. The service should return a proper error message indicating that the text is too long and exceeds the maximum allowed character limit of 500 characters for a single TTS generation request.\",\n  \"voiceName\": \"Sulafat\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/tts/generate-text",
+              "host": ["{{baseUrl}}"],
+              "path": ["tts", "generate-text"]
+            },
+            "description": "Should return 400 error: Text too long (max 500 characters)"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api/v1",
+      "type": "string"
+    }
+  ]
+}

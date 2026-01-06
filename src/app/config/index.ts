@@ -1,0 +1,53 @@
+import dotenv from 'dotenv';
+import path from 'path';
+
+dotenv.config({ path: path.join(process.cwd(), '.env') });
+
+export default {
+  port: process.env.PORT,
+  database_url: process.env.DATABASE_URL,
+  bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
+  default_pass: process.env.DEFAULT_PASS,
+  jwt: {
+    secret: process.env.JWT_SECRET,
+    refresh_secret: process.env.JWT_REFRESH_SECRET,
+    expires_in: process.env.JWT_EXPIRES_IN,
+    refresh_expires_in: process.env.JWT_REFRESH_EXPIRES_IN,
+  },
+  env: process.env.ENV,
+  cloudinary: {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  },
+  google: {
+    client_id: process.env.GOOGLE_CLIENT_ID,
+    client_secret: process.env.GOOGLE_CLIENT_SECRET,
+    callback_url: process.env.GOOGLE_CALLBACK_URL,
+  },
+  client_url: process.env.CLIENT_URL || 'http://localhost:3001',
+  gemini: {
+    api_key: process.env.GEMINI_API_KEY,
+  },
+  azure: {
+    speech: {
+      key: process.env.AZURE_SPEECH_KEY,
+      region: process.env.AZURE_SPEECH_REGION,
+      voiceName: process.env.AZURE_SPEECH_VOICE,
+    },
+    blob: {
+      connectionString: process.env.AZURE_BLOB_CONNECTION_STRING,
+      container: process.env.AZURE_BLOB_CONTAINER,
+    },
+    translator: {
+      key: process.env.AZURE_TRANSLATOR_KEY,
+      endpoint: process.env.AZURE_TRANSLATOR_ENDPOINT,
+      region: process.env.AZURE_TRANSLATOR_REGION,
+    },
+  },
+  sslcommerz: {
+    store_id: process.env.SSLCOMMERZ_STORE_ID,
+    store_passwd: process.env.SSLCOMMERZ_STORE_PASSWD,
+    is_live: process.env.SSLCOMMERZ_IS_LIVE === 'true',
+  },
+};
