@@ -113,7 +113,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   config.client_url,
-  'https://kalrtext.vercel.app',
+  'https://klartext-wine.vercel.app/',
   'http://localhost:3001',
   'http://localhost:5000', // Vite default
   'https://sandbox.sslcommerz.com', // SSLCommerz Sandbox
