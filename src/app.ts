@@ -113,6 +113,7 @@ app.use(cookieParser());
 
 const allowedOrigins = [
   config.client_url,
+  'https://klartext-wine.vercel.app',
   'https://klartext-wine.vercel.app/',
   'http://localhost:3001',
   'http://localhost:5000', // Vite default
@@ -125,7 +126,11 @@ app.use(cors({
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
     
-    if (allowedOrigins.includes(origin)) {
+    // Normalize origin by removing trailing slash for comparison
+    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    const normalizedAllowedOrigins = allowedOrigins.map(o => o?.endsWith('/') ? o.slice(0, -1) : o);
+    
+    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
       callback(null, true);
     } else if (config.env !== 'production') {
       // In development, allow all origins
