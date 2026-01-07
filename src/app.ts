@@ -112,14 +112,21 @@ app.use(cookieParser());
 // ============================================
 
 const allowedOrigins = [
-  config.client_url,
   'https://klartext-wine.vercel.app',
-  'https://klartext-wine.vercel.app/',
   'http://localhost:3001',
-  'http://localhost:5000', // Vite default
+  'http://localhost:3000',
+  'http://localhost:5000',
   'https://sandbox.sslcommerz.com', // SSLCommerz Sandbox
   'https://securepay.sslcommerz.com', // SSLCommerz Live
-].filter(Boolean) as string[];
+];
+
+// Add client_url if it exists and is not already in the list
+if (config.client_url) {
+  const normalizedClientUrl = config.client_url.replace(/\/$/, ''); // Remove trailing slash
+  if (!allowedOrigins.includes(normalizedClientUrl)) {
+    allowedOrigins.push(normalizedClientUrl);
+  }
+}
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -127,15 +134,19 @@ app.use(cors({
     if (!origin) return callback(null, true);
     
     // Normalize origin by removing trailing slash for comparison
-    const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
-    const normalizedAllowedOrigins = allowedOrigins.map(o => o?.endsWith('/') ? o.slice(0, -1) : o);
+    const normalizedOrigin = origin.replace(/\/$/, '');
     
-    if (normalizedAllowedOrigins.includes(normalizedOrigin)) {
-      callback(null, true);
-    } else if (config.env !== 'production') {
-      // In development, allow all origins
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some(allowed => {
+      const normalizedAllowed = allowed.replace(/\/$/, '');
+      return normalizedAllowed === normalizedOrigin;
+    });
+    
+    if (isAllowed) {
       callback(null, true);
     } else {
+      console.error('❌ CORS blocked origin:', origin);
+      console.error('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
