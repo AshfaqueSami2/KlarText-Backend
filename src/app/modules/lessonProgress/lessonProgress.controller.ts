@@ -23,7 +23,7 @@ const markComplete = catchAsync(async (req: Request, res: Response) => {
 });
 
 const reviewLesson = catchAsync(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
+  const lessonId = req.params.lessonId as string;
   const user = req.user as { userId: string; role: string } | undefined;
   const userId = user?.userId;
   if (!userId) {

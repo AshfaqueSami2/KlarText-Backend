@@ -24,7 +24,7 @@ const markComplete = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const reviewLesson = (0, catchAsync_1.default)(async (req, res) => {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId;
     const user = req.user;
     const userId = user?.userId;
     if (!userId) {
