@@ -19,7 +19,22 @@ import { requestTimeout } from "./app/middleWares/timeout";
 const app: Application = express();
 
 // ============================================
-// 📝 REQUEST LOGGING (before other middleware)
+// � DATABASE CONNECTION (Serverless Compatible)
+// ============================================
+import { connectDatabase } from "./app/config/database";
+
+// Initialize database connection for serverless
+if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+  const dbUrl = config.database_url;
+  if (dbUrl) {
+    connectDatabase(dbUrl).catch(err => {
+      console.error('Database connection failed:', err);
+    });
+  }
+}
+
+// ============================================
+// �📝 REQUEST LOGGING (before other middleware)
 // ============================================
 app.use(requestLogger);
 

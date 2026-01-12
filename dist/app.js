@@ -53,6 +53,15 @@ const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const config_1 = __importDefault(require("./app/config"));
 const timeout_1 = require("./app/middleWares/timeout");
 const app = (0, express_1.default)();
+const database_1 = require("./app/config/database");
+if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
+    const dbUrl = config_1.default.database_url;
+    if (dbUrl) {
+        (0, database_1.connectDatabase)(dbUrl).catch(err => {
+            console.error('Database connection failed:', err);
+        });
+    }
+}
 app.use(requestLogger_1.default);
 app.use((0, helmet_1.default)({
     contentSecurityPolicy: config_1.default.env === 'production',
