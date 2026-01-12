@@ -12,6 +12,7 @@
     "build:clean": "rimraf dist && tsc",
     "start": "node dist/server.js",
     "start:prod": "NODE_ENV=production node dist/server.js",
+    "vercel-build": "npm install && tsc",
     "pm2:start": "pm2 start ecosystem.config.js --env production",
     "pm2:stop": "pm2 stop klartext-api",
     "pm2:restart": "pm2 restart klartext-api",

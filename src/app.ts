@@ -191,8 +191,7 @@ app.use(passport.session());
 // 📁 STATIC FILES & ROUTES
 // ============================================
 
-// Serve static audio files
-app.use('/audio', express.static(path.join(process.cwd(), 'public/audio')));
+// Audio files are served directly from Azure Blob Storage (Vercel compatible)
 
 // Health check endpoint (before auth middleware)
 app.get('/health', async (_req: Request, res: Response) => {

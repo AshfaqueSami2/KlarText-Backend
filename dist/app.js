@@ -51,7 +51,6 @@ const passport_1 = __importDefault(require("./app/config/passport"));
 const express_session_1 = __importDefault(require("express-session"));
 const connect_mongo_1 = __importDefault(require("connect-mongo"));
 const config_1 = __importDefault(require("./app/config"));
-const path_1 = __importDefault(require("path"));
 const timeout_1 = require("./app/middleWares/timeout");
 const app = (0, express_1.default)();
 app.use(requestLogger_1.default);
@@ -114,7 +113,6 @@ app.use((0, cookie_parser_1.default)());
 const allowedOrigins = [
     'https://klartext-wine.vercel.app',
     'http://localhost:3001',
-    'http://localhost:3000',
     'http://localhost:5000',
     'https://sandbox.sslcommerz.com',
     'https://securepay.sslcommerz.com',
@@ -169,7 +167,6 @@ app.use((0, express_session_1.default)({
 }));
 app.use(passport_1.default.initialize());
 app.use(passport_1.default.session());
-app.use('/audio', express_1.default.static(path_1.default.join(process.cwd(), 'public/audio')));
 app.get('/health', async (_req, res) => {
     const { getDatabaseStatus } = await Promise.resolve().then(() => __importStar(require('./app/config/database')));
     const dbStatus = getDatabaseStatus();
@@ -190,8 +187,6 @@ app.get('/health', async (_req, res) => {
     });
 });
 app.use('/api/v1', routes_1.default);
-app.use(globalErrorHandler_1.default);
-app.use(notFound_1.default);
 app.get('/', (_req, res) => {
     res.json({
         success: true,
@@ -200,5 +195,7 @@ app.get('/', (_req, res) => {
         docs: '/api/v1',
     });
 });
+app.use(globalErrorHandler_1.default);
+app.use(notFound_1.default);
 exports.default = app;
 //# sourceMappingURL=app.js.map

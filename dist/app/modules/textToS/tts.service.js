@@ -38,8 +38,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AzureTTSService = void 0;
 const sdk = __importStar(require("microsoft-cognitiveservices-speech-sdk"));
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
 const config_1 = __importDefault(require("../../config"));
 const AppError_1 = __importDefault(require("../../Error/AppError"));
 const http_status_codes_1 = require("http-status-codes");
@@ -53,13 +51,6 @@ class AzureTTSService {
             }
             this.speechConfig = sdk.SpeechConfig.fromSubscription(config_1.default.azure.speech.key, config_1.default.azure.speech.region);
         }
-    }
-    static ensureAudioDirectory() {
-        const audioDir = path_1.default.join(process.cwd(), 'public', 'audio', 'lessons');
-        if (!fs_1.default.existsSync(audioDir)) {
-            fs_1.default.mkdirSync(audioDir, { recursive: true });
-        }
-        return audioDir;
     }
     static async generateAudio(text, options = {}) {
         try {

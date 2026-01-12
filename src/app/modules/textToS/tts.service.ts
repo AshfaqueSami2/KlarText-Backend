@@ -32,13 +32,7 @@ export class AzureTTSService {
     }
   }
 
-  private static ensureAudioDirectory(): string {
-    const audioDir = path.join(process.cwd(), 'public', 'audio', 'lessons');
-    if (!fs.existsSync(audioDir)) {
-      fs.mkdirSync(audioDir, { recursive: true });
-    }
-    return audioDir;
-  }
+  // Removed ensureAudioDirectory - all files go directly to Azure Blob Storage for Vercel compatibility
 
   static async generateAudio(
     text: string,

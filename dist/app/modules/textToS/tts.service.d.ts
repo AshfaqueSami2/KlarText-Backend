@@ -2,7 +2,6 @@ import { AzureTTSOptions, TTSResponse, GermanVoice, SupportedLanguage } from './
 export declare class AzureTTSService {
     private static speechConfig;
     private static initializeSpeechConfig;
-    private static ensureAudioDirectory;
     static generateAudio(text: string, options?: AzureTTSOptions): Promise<TTSResponse>;
     static generateLessonAudio(lessonTitle: string, lessonContent: string, options?: AzureTTSOptions): Promise<TTSResponse>;
     static generateBatchAudio(texts: string[], options?: AzureTTSOptions): Promise<TTSResponse[]>;
