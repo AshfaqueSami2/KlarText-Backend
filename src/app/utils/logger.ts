@@ -45,41 +45,6 @@ const fileFormat = winston.format.combine(
   winston.format.json()
 );
 
-// Log directory
-const logDir = path.join(process.cwd(), 'logs');
-
-// Daily rotate file transport for combined logs
-const combinedRotateTransport = new DailyRotateFile({
-  filename: path.join(logDir, 'combined-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '14d', // Keep logs for 14 days
-  format: fileFormat,
-});
-
-// Daily rotate file transport for error logs only
-const errorRotateTransport = new DailyRotateFile({
-  filename: path.join(logDir, 'error-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '30d', // Keep error logs for 30 days
-  level: 'error',
-  format: fileFormat,
-});
-
-// Daily rotate file transport for HTTP request logs
-const httpRotateTransport = new DailyRotateFile({
-  filename: path.join(logDir, 'http-%DATE%.log'),
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '7d', // Keep HTTP logs for 7 days
-  level: 'http',
-  format: fileFormat,
-});
-
 // Define transports array
 const transports: winston.transport[] = [
   // Console transport (always enabled)
@@ -88,8 +53,46 @@ const transports: winston.transport[] = [
   }),
 ];
 
-// Add file transports only in non-test environments
-if (config.env !== 'test') {
+// Add file transports only in local development (not in serverless environments like Vercel)
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const isLocalDev = config.env === 'development' && !isServerless;
+
+if (isLocalDev) {
+  // Log directory
+  const logDir = path.join(process.cwd(), 'logs');
+  
+  // Daily rotate file transport for combined logs
+  const combinedRotateTransport = new DailyRotateFile({
+    filename: path.join(logDir, 'combined-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d', // Keep logs for 14 days
+    format: fileFormat,
+  });
+
+  // Daily rotate file transport for error logs only
+  const errorRotateTransport = new DailyRotateFile({
+    filename: path.join(logDir, 'error-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '30d', // Keep error logs for 30 days
+    level: 'error',
+    format: fileFormat,
+  });
+
+  // Daily rotate file transport for HTTP request logs
+  const httpRotateTransport = new DailyRotateFile({
+    filename: path.join(logDir, 'http-%DATE%.log'),
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '7d', // Keep HTTP logs for 7 days
+    level: 'http',
+    format: fileFormat,
+  });
+
   transports.push(combinedRotateTransport, errorRotateTransport, httpRotateTransport);
 }
 
@@ -100,15 +103,6 @@ const logger = winston.createLogger({
   transports,
   // Don't exit on handled exceptions
   exitOnError: false,
-});
-
-// Handle transport errors
-combinedRotateTransport.on('error', (error) => {
-  console.error('Error in combined log transport:', error);
-});
-
-errorRotateTransport.on('error', (error) => {
-  console.error('Error in error log transport:', error);
 });
 
 // Stream for Morgan HTTP logging (if needed later)

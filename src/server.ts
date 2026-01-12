@@ -2,21 +2,12 @@ import mongoose from "mongoose";
 import config from "./app/config";
 import app from "./app";
 import logger from "./app/utils/logger";
-import { initRedis, closeRedis } from "./app/config/redis";
 import { connectDatabase, closeDatabaseConnection, getDatabaseStatus } from "./app/config/database";
 
 async function main() {
   try {
     // Connect to MongoDB with optimized settings
     await connectDatabase(config.database_url as string);
-
-    // Initialize Redis (optional - continues if not available)
-    const redisConnected = await initRedis();
-    if (redisConnected) {
-      logger.info('⚡ Redis caching enabled');
-    } else {
-      logger.warn('⚠️ Redis not available - caching disabled');
-    }
 
     const server = app.listen(config.port, () => {
       logger.info(`🚀 Server is running on port ${config.port}`);
@@ -39,9 +30,6 @@ async function main() {
       
       server.close(async () => {
         logger.info('HTTP server closed');
-        
-        // Close Redis connection
-        await closeRedis();
         
         // Close MongoDB connection
         await closeDatabaseConnection();

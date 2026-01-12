@@ -6,18 +6,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const config_1 = __importDefault(require("./app/config"));
 const app_1 = __importDefault(require("./app"));
 const logger_1 = __importDefault(require("./app/utils/logger"));
-const redis_1 = require("./app/config/redis");
 const database_1 = require("./app/config/database");
 async function main() {
     try {
         await (0, database_1.connectDatabase)(config_1.default.database_url);
-        const redisConnected = await (0, redis_1.initRedis)();
-        if (redisConnected) {
-            logger_1.default.info('⚡ Redis caching enabled');
-        }
-        else {
-            logger_1.default.warn('⚠️ Redis not available - caching disabled');
-        }
         const server = app_1.default.listen(config_1.default.port, () => {
             logger_1.default.info(`🚀 Server is running on port ${config_1.default.port}`);
             logger_1.default.info(`📍 Environment: ${config_1.default.env}`);
@@ -32,7 +24,6 @@ async function main() {
             logger_1.default.info(`${signal} received. Shutting down gracefully...`);
             server.close(async () => {
                 logger_1.default.info('HTTP server closed');
-                await (0, redis_1.closeRedis)();
                 await (0, database_1.closeDatabaseConnection)();
                 process.exit(0);
             });

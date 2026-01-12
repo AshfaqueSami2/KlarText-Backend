@@ -29,39 +29,41 @@ const level = () => {
 };
 const consoleFormat = winston_1.default.format.combine(winston_1.default.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), winston_1.default.format.colorize({ all: true }), winston_1.default.format.printf((info) => `${info.timestamp} [${info.level}]: ${info.message}${info.stack ? '\n' + info.stack : ''}`));
 const fileFormat = winston_1.default.format.combine(winston_1.default.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }), winston_1.default.format.errors({ stack: true }), winston_1.default.format.json());
-const logDir = path_1.default.join(process.cwd(), 'logs');
-const combinedRotateTransport = new winston_daily_rotate_file_1.default({
-    filename: path_1.default.join(logDir, 'combined-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '14d',
-    format: fileFormat,
-});
-const errorRotateTransport = new winston_daily_rotate_file_1.default({
-    filename: path_1.default.join(logDir, 'error-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '30d',
-    level: 'error',
-    format: fileFormat,
-});
-const httpRotateTransport = new winston_daily_rotate_file_1.default({
-    filename: path_1.default.join(logDir, 'http-%DATE%.log'),
-    datePattern: 'YYYY-MM-DD',
-    zippedArchive: true,
-    maxSize: '20m',
-    maxFiles: '7d',
-    level: 'http',
-    format: fileFormat,
-});
 const transports = [
     new winston_1.default.transports.Console({
         format: consoleFormat,
     }),
 ];
-if (config_1.default.env !== 'test') {
+const isServerless = process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME;
+const isLocalDev = config_1.default.env === 'development' && !isServerless;
+if (isLocalDev) {
+    const logDir = path_1.default.join(process.cwd(), 'logs');
+    const combinedRotateTransport = new winston_daily_rotate_file_1.default({
+        filename: path_1.default.join(logDir, 'combined-%DATE%.log'),
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '14d',
+        format: fileFormat,
+    });
+    const errorRotateTransport = new winston_daily_rotate_file_1.default({
+        filename: path_1.default.join(logDir, 'error-%DATE%.log'),
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '30d',
+        level: 'error',
+        format: fileFormat,
+    });
+    const httpRotateTransport = new winston_daily_rotate_file_1.default({
+        filename: path_1.default.join(logDir, 'http-%DATE%.log'),
+        datePattern: 'YYYY-MM-DD',
+        zippedArchive: true,
+        maxSize: '20m',
+        maxFiles: '7d',
+        level: 'http',
+        format: fileFormat,
+    });
     transports.push(combinedRotateTransport, errorRotateTransport, httpRotateTransport);
 }
 const logger = winston_1.default.createLogger({
@@ -69,12 +71,6 @@ const logger = winston_1.default.createLogger({
     levels,
     transports,
     exitOnError: false,
-});
-combinedRotateTransport.on('error', (error) => {
-    console.error('Error in combined log transport:', error);
-});
-errorRotateTransport.on('error', (error) => {
-    console.error('Error in error log transport:', error);
 });
 exports.stream = {
     write: (message) => {

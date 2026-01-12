@@ -105,30 +105,41 @@ app.use((req, _res, next) => {
     }
     next();
 });
-app.use((0, timeout_1.requestTimeout)(30000));
+const timeout = config_1.default.env === 'production' ? 50000 : 30000;
+app.use((0, timeout_1.requestTimeout)(timeout));
 app.use((0, compression_1.default)());
 app.use(express_1.default.json({ limit: '10mb' }));
 app.use(express_1.default.urlencoded({ extended: true, limit: '10mb' }));
 app.use((0, cookie_parser_1.default)());
 const allowedOrigins = [
-    config_1.default.client_url,
-    'https://klartext-wine.vercel.app/',
+    'https://klartext-wine.vercel.app',
     'http://localhost:3001',
+    'http://localhost:3000',
     'http://localhost:5000',
     'https://sandbox.sslcommerz.com',
     'https://securepay.sslcommerz.com',
-].filter(Boolean);
+];
+if (config_1.default.client_url) {
+    const normalizedClientUrl = config_1.default.client_url.replace(/\/$/, '');
+    if (!allowedOrigins.includes(normalizedClientUrl)) {
+        allowedOrigins.push(normalizedClientUrl);
+    }
+}
 app.use((0, cors_1.default)({
     origin: (origin, callback) => {
         if (!origin)
             return callback(null, true);
-        if (allowedOrigins.includes(origin)) {
-            callback(null, true);
-        }
-        else if (config_1.default.env !== 'production') {
+        const normalizedOrigin = origin.replace(/\/$/, '');
+        const isAllowed = allowedOrigins.some(allowed => {
+            const normalizedAllowed = allowed.replace(/\/$/, '');
+            return normalizedAllowed === normalizedOrigin;
+        });
+        if (isAllowed) {
             callback(null, true);
         }
         else {
+            console.error('❌ CORS blocked origin:', origin);
+            console.error('Allowed origins:', allowedOrigins);
             callback(new Error('Not allowed by CORS'));
         }
     },

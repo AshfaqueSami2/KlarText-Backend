@@ -92,8 +92,10 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 // ============================================
 // ⏱️ REQUEST TIMEOUT
 // ============================================
-// Prevent slow requests from blocking the server (30 seconds default)
-app.use(requestTimeout(30000));
+// Prevent slow requests from blocking the server
+// Vercel has 60s max timeout on Pro plan, 10s on Hobby
+const timeout = config.env === 'production' ? 50000 : 30000; // 50s for production
+app.use(requestTimeout(timeout));
 
 // ============================================
 // 📦 COMPRESSION & PARSING
@@ -114,7 +116,6 @@ app.use(cookieParser());
 const allowedOrigins = [
   'https://klartext-wine.vercel.app',
   'http://localhost:3001',
-  'http://localhost:3000',
   'http://localhost:5000',
   'https://sandbox.sslcommerz.com', // SSLCommerz Sandbox
   'https://securepay.sslcommerz.com', // SSLCommerz Live
@@ -219,9 +220,6 @@ app.get('/health', async (_req: Request, res: Response) => {
 // API routes
 app.use('/api/v1', router);
 
-// Error handling
-app.use(globalErrorHandler);
-app.use(notFound);
 
 // Root endpoint
 app.get('/', (_req: Request, res: Response) => {
@@ -232,6 +230,10 @@ app.get('/', (_req: Request, res: Response) => {
     docs: '/api/v1',
   });
 })
+
+// Error handling
+app.use(globalErrorHandler);
+app.use(notFound);
 
 
 export default app;
