@@ -101,7 +101,7 @@ const getVoices = catchAsync(async (req: Request, res: Response) => {
 });
 
 const streamAudio = catchAsync(async (req: Request, res: Response) => {
-  const { fileName } = req.params;
+  const fileName = req.params.fileName as string;
 
   if (!fileName) {
     throw new AppError(StatusCodes.BAD_REQUEST, 'File name is required');

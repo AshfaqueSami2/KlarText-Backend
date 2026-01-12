@@ -8,7 +8,7 @@ const student_service_1 = require("./student.service");
 const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const http_status_codes_1 = require("http-status-codes");
 const updateStudent = async (req, res) => {
-    const { id } = req.params;
+    const id = req.params.id;
     const result = await student_service_1.StudentServices.updateStudentIntoDB(id, req.body);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,

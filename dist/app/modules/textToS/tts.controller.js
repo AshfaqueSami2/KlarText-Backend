@@ -113,7 +113,7 @@ const getVoices = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const streamAudio = (0, catchAsync_1.default)(async (req, res) => {
-    const { fileName } = req.params;
+    const fileName = req.params.fileName;
     if (!fileName) {
         throw new AppError_1.default(http_status_codes_1.StatusCodes.BAD_REQUEST, 'File name is required');
     }

@@ -30,7 +30,7 @@ import { StatusCodes } from 'http-status-codes';
 
 // Existing method (By ID)
 const updateStudent = async (req: Request, res: Response) => {
-  const { id } = req.params;
+  const id = req.params.id as string;
   const result = await StudentServices.updateStudentIntoDB(id, req.body);
   sendResponse(res, {
     statusCode: StatusCodes.OK,
