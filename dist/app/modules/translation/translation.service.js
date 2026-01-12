@@ -7,7 +7,7 @@ exports.TranslationServices = void 0;
 const config_1 = __importDefault(require("../../config"));
 const translationCache_model_1 = require("./translationCache.model");
 const axios_1 = __importDefault(require("axios"));
-const uuid_1 = require("uuid");
+const crypto_1 = require("crypto");
 const logger_1 = __importDefault(require("../../utils/logger"));
 const translateText = async (text) => {
     try {
@@ -33,7 +33,7 @@ const translateText = async (text) => {
                 'Ocp-Apim-Subscription-Key': key,
                 'Ocp-Apim-Subscription-Region': region,
                 'Content-Type': 'application/json',
-                'X-ClientTraceId': (0, uuid_1.v4)()
+                'X-ClientTraceId': (0, crypto_1.randomUUID)()
             }
         });
         if (!response.data || !Array.isArray(response.data) || response.data.length === 0) {

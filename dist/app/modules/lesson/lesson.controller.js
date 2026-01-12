@@ -69,7 +69,7 @@ const getAllLessons = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const updateLesson = (0, catchAsync_1.default)(async (req, res) => {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId;
     let updateData = { ...req.body };
     if (req.file) {
         try {
@@ -101,7 +101,7 @@ const updateLesson = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const deleteLesson = (0, catchAsync_1.default)(async (req, res) => {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId;
     const result = await lesson_service_1.LessonServices.deleteLessonFromDB(lessonId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,
@@ -111,7 +111,7 @@ const deleteLesson = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const getLessonById = (0, catchAsync_1.default)(async (req, res) => {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId;
     const result = await lesson_service_1.LessonServices.getLessonByIdFromDB(lessonId);
     if (!result) {
         throw new AppError_1.default(http_status_codes_1.StatusCodes.NOT_FOUND, 'Lesson not found');
@@ -124,7 +124,7 @@ const getLessonById = (0, catchAsync_1.default)(async (req, res) => {
     });
 });
 const regenerateAudio = (0, catchAsync_1.default)(async (req, res) => {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId;
     const result = await lesson_service_1.LessonServices.regenerateAudioForLesson(lessonId);
     (0, sendResponse_1.default)(res, {
         statusCode: http_status_codes_1.StatusCodes.OK,

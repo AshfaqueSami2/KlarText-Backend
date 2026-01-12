@@ -4,91 +4,42 @@ import helmet from "helmet";
 import hpp from "hpp";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
-import globalErrorHandler from "./app/middleWares/globalErrorHandler";
-import requestLogger from "./app/middleWares/requestLogger";
-import router from "./app/routes";
-import cookieParser from "cookie-parser";
-import notFound from "./app/middleWares/notFound";
-import passport from "./app/config/passport";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import cookieParser from "cookie-parser";
 import config from "./app/config";
-import path from "path";
+import passport from "./app/config/passport";
+import requestLogger from "./app/middleWares/requestLogger";
 import { requestTimeout } from "./app/middleWares/timeout";
+import router from "./app/routes";
+import globalErrorHandler from "./app/middleWares/globalErrorHandler";
+import notFound from "./app/middleWares/notFound";
 
 const app: Application = express();
 
-// ============================================
-// � DATABASE CONNECTION (Serverless Compatible)
-// ============================================
-import { connectDatabase } from "./app/config/database";
-
-// Initialize database connection for serverless
-if (process.env.VERCEL || process.env.NODE_ENV === 'production') {
-  const dbUrl = config.database_url;
-  if (dbUrl) {
-    connectDatabase(dbUrl).catch(err => {
-      console.error('Database connection failed:', err);
-    });
-  }
-}
-
-// ============================================
-// �📝 REQUEST LOGGING (before other middleware)
-// ============================================
+// Request logging
 app.use(requestLogger);
 
-// ============================================
-// 🛡️ SECURITY MIDDLEWARE
-// ============================================
+// Security
+app.use(helmet({ contentSecurityPolicy: config.env === 'production', crossOriginEmbedderPolicy: false }));
+app.use(hpp({ whitelist: ['sort', 'page', 'limit', 'fields', 'filter'] }));
 
-// Helmet - Sets various HTTP headers for security
-app.use(helmet({
-  contentSecurityPolicy: config.env === 'production',
-  crossOriginEmbedderPolicy: false,
+// Rate limiting
+app.use('/api', rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: config.env === 'production' ? 100 : 1000,
+  skip: (req) => req.path === '/health' || req.path === '/',
 }));
 
-// Rate limiting - Prevent brute force & DDoS attacks
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: config.env === 'production' ? 100 : 1000, // Limit each IP
-  message: {
-    success: false,
-    message: 'Too many requests from this IP, please try again after 15 minutes',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-  skip: (req: Request) => {
-    // Skip rate limiting for health checks
-    return req.path === '/health' || req.path === '/';
-  },
-});
-app.use('/api', limiter);
-
-// Stricter rate limit for auth routes
-const authLimiter = rateLimit({
-  windowMs: 60 * 60 * 1000, // 1 hour
-  max: 10, // 10 attempts per hour
-  message: {
-    success: false,
-    message: 'Too many login attempts, please try again after an hour',
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api/v1/auth/login', authLimiter);
-
-// HPP - Prevent HTTP Parameter Pollution
-app.use(hpp({
-  whitelist: ['sort', 'page', 'limit', 'fields', 'filter'], // Allow these query params to have multiple values
+app.use('/api/v1/auth/login', rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 10,
 }));
 
-// Custom NoSQL Injection Prevention (Express 5 compatible)
+// NoSQL Injection Prevention
 const sanitizeInput = (obj: Record<string, unknown>): void => {
   if (!obj || typeof obj !== 'object') return;
-  
   for (const key of Object.keys(obj)) {
-    // Remove keys that start with $ or contain .
     if (key.startsWith('$') || key.includes('.')) {
       delete obj[key];
     } else if (typeof obj[key] === 'object' && obj[key] !== null) {
@@ -98,87 +49,43 @@ const sanitizeInput = (obj: Record<string, unknown>): void => {
 };
 
 app.use((req: Request, _res: Response, next: NextFunction) => {
-  if (req.body && typeof req.body === 'object') {
-    sanitizeInput(req.body as Record<string, unknown>);
-  }
+  if (req.body && typeof req.body === 'object') sanitizeInput(req.body as Record<string, unknown>);
   next();
 });
 
-// ============================================
-// ⏱️ REQUEST TIMEOUT
-// ============================================
-// Prevent slow requests from blocking the server
-// Vercel has 60s max timeout on Pro plan, 10s on Hobby
-const timeout = config.env === 'production' ? 50000 : 30000; // 50s for production
-app.use(requestTimeout(timeout));
+// Timeout
+app.use(requestTimeout(config.env === 'production' ? 50000 : 30000));
 
-// ============================================
-// 📦 COMPRESSION & PARSING
-// ============================================
-
-// Compression - Reduce response size
+// Parsing & Compression
 app.use(compression());
-
-// Body parsers
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 
-// ============================================
-// 🌐 CORS CONFIGURATION
-// ============================================
-
+// CORS
 const allowedOrigins = [
   'https://klartext-wine.vercel.app',
   'http://localhost:3001',
   'http://localhost:5000',
-  'https://sandbox.sslcommerz.com', // SSLCommerz Sandbox
-  'https://securepay.sslcommerz.com', // SSLCommerz Live
-];
-
-// Add client_url if it exists and is not already in the list
-if (config.client_url) {
-  const normalizedClientUrl = config.client_url.replace(/\/$/, ''); // Remove trailing slash
-  if (!allowedOrigins.includes(normalizedClientUrl)) {
-    allowedOrigins.push(normalizedClientUrl);
-  }
-}
+  'https://sandbox.sslcommerz.com',
+  'https://securepay.sslcommerz.com',
+  config.client_url,
+].filter(Boolean);
 
 app.use(cors({
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, Postman, etc.)
-    if (!origin) return callback(null, true);
-    
-    // Normalize origin by removing trailing slash for comparison
-    const normalizedOrigin = origin.replace(/\/$/, '');
-    
-    // Check if origin is allowed
-    const isAllowed = allowedOrigins.some(allowed => {
-      const normalizedAllowed = allowed.replace(/\/$/, '');
-      return normalizedAllowed === normalizedOrigin;
-    });
-    
-    if (isAllowed) {
+    if (!origin || allowedOrigins.some(allowed => allowed?.replace(/\/$/, '') === origin?.replace(/\/$/, ''))) {
       callback(null, true);
     } else {
-      console.error('❌ CORS blocked origin:', origin);
-      console.error('Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
-  exposedHeaders: ['X-Total-Count', 'X-Page-Count'],
-  maxAge: 86400, // 24 hours - browsers cache preflight response
 }));
 
-// ============================================
-// 🔐 SESSION & AUTHENTICATION
-// ============================================
-
-// Session configuration with MongoDB store for production persistence
-// This ensures sessions survive server restarts and work across PM2 cluster instances
+// Session & Passport
 app.use(session({
   secret: config.jwt.secret as string,
   resave: false,
@@ -186,68 +93,48 @@ app.use(session({
   store: MongoStore.create({
     mongoUrl: config.database_url as string,
     collectionName: 'sessions',
-    ttl: 24 * 60 * 60, // Session TTL in seconds (24 hours)
-    autoRemove: 'native', // Use MongoDB TTL index for cleanup
-    touchAfter: 24 * 3600, // Only update session once per 24 hours unless data changes
+    ttl: 24 * 60 * 60,
   }),
   cookie: {
     secure: config.env === 'production',
     httpOnly: true,
-    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    maxAge: 24 * 60 * 60 * 1000,
     sameSite: config.env === 'production' ? 'strict' : 'lax',
   },
 }));
 
-// Initialize Passport for Google OAuth
 app.use(passport.initialize());
 app.use(passport.session());
 
-// ============================================
-// 📁 STATIC FILES & ROUTES
-// ============================================
-
-// Audio files are served directly from Azure Blob Storage (Vercel compatible)
-
-// Health check endpoint (before auth middleware)
+// Health check
 app.get('/health', async (_req: Request, res: Response) => {
-  // Dynamic import to avoid circular dependency
   const { getDatabaseStatus } = await import('./app/config/database');
   const dbStatus = getDatabaseStatus();
-  
-  res.status(200).json({
+  res.json({
     success: true,
     message: 'KlarText API is healthy',
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
     environment: config.env,
-    database: {
-      status: dbStatus.state,
-      name: dbStatus.name,
-    },
-    memory: {
-      used: Math.round(process.memoryUsage().heapUsed / 1024 / 1024) + ' MB',
-      total: Math.round(process.memoryUsage().heapTotal / 1024 / 1024) + ' MB',
-    },
+    database: dbStatus.state,
+    uptime: Math.floor(process.uptime()),
+  });
+});
+
+// Root
+app.get('/', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: 'KlarText API',
+    version: '1.0.0',
   });
 });
 
 // API routes
 app.use('/api/v1', router);
 
-
-// Root endpoint
-app.get('/', (_req: Request, res: Response) => {
-  res.json({
-    success: true,
-    message: 'KlarText API is running',
-    version: '1.0.0',
-    docs: '/api/v1',
-  });
-})
-
 // Error handling
 app.use(globalErrorHandler);
 app.use(notFound);
 
-
 export default app;
+
+

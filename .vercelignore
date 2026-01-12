@@ -1,5 +1,0 @@
-# Vercel
-.vercel
-*.log
-node_modules
-.env*

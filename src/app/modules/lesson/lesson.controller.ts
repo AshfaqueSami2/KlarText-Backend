@@ -86,7 +86,7 @@ const getAllLessons = catchAsync(async (req: Request, res: Response) => {
 
 //update
 const updateLesson = catchAsync(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
+  const lessonId = req.params.lessonId as string;
   let updateData = { ...req.body };
   
   // Handle cover image upload if provided
@@ -128,7 +128,7 @@ const updateLesson = catchAsync(async (req: Request, res: Response) => {
 
 //delete
 const deleteLesson = catchAsync(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
+  const lessonId = req.params.lessonId as string;
   const result = await LessonServices.deleteLessonFromDB(lessonId);
 
   sendResponse(res, {
@@ -141,7 +141,7 @@ const deleteLesson = catchAsync(async (req: Request, res: Response) => {
 
 // Get single lesson with audio status
 const getLessonById = catchAsync(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
+  const lessonId = req.params.lessonId as string;
   const result = await LessonServices.getLessonByIdFromDB(lessonId);
   
   if (!result) {
@@ -158,7 +158,7 @@ const getLessonById = catchAsync(async (req: Request, res: Response) => {
 
 // Regenerate audio for a lesson (Admin only)
 const regenerateAudio = catchAsync(async (req: Request, res: Response) => {
-  const { lessonId } = req.params;
+  const lessonId = req.params.lessonId as string;
   const result = await LessonServices.regenerateAudioForLesson(lessonId);
 
   sendResponse(res, {

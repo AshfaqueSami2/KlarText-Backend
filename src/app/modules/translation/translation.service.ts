@@ -2,7 +2,7 @@
 import config from '../../config'; 
 import { TranslationCache } from './translationCache.model';
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import logger from '../../utils/logger';
 
 const translateText = async (text: string) => {
@@ -41,7 +41,7 @@ const translateText = async (text: string) => {
         'Ocp-Apim-Subscription-Key': key,
         'Ocp-Apim-Subscription-Region': region,
         'Content-Type': 'application/json',
-        'X-ClientTraceId': uuidv4()
+        'X-ClientTraceId': randomUUID()
       }
     });
 
