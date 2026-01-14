@@ -65,6 +65,8 @@ app.use(cookieParser());
 // CORS
 const allowedOrigins = [
   'https://klartext-wine.vercel.app',
+  'https://www.klartext.tech',
+  'https://klartext.tech',
   'http://localhost:3001',
   'http://localhost:5000',
   'https://sandbox.sslcommerz.com',
