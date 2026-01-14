@@ -76,7 +76,9 @@ const markLessonAsComplete = async (userId: string, lessonId: string) => {
     }
 
     // 5. Create Progress Record
-    await LessonProgress.create([{ user: userId, lesson: lessonId, isCompleted: true }], { session });
+    logger.debug(`[markLessonAsComplete] Creating progress record for user: ${userId}, lesson: ${lessonId}`);
+    const createdProgress = await LessonProgress.create([{ user: userId, lesson: lessonId, isCompleted: true }], { session });
+    logger.debug(`[markLessonAsComplete] Progress record created:`, { progressId: createdProgress[0]?._id, user: createdProgress[0]?.user, lesson: createdProgress[0]?.lesson });
 
     // 6. Add Coins (+10)
     const updatedStudent = await Student.findOneAndUpdate(
@@ -89,6 +91,7 @@ const markLessonAsComplete = async (userId: string, lessonId: string) => {
     const levelPromotion = await checkAndPromoteLevel(userId, student.currentLevel, lessonId, session);
 
     await session.commitTransaction();
+    logger.debug(`[markLessonAsComplete] Transaction committed successfully for user: ${userId}, lesson: ${lessonId}`);
     await session.endSession();
 
     return { 
@@ -199,19 +202,51 @@ const reviewCompletedLesson = async (userId: string, lessonId: string) => {
 };
 
 const getStudentProgress = async (userId: string) => {
+  logger.debug(`[getStudentProgress] Fetching progress for user: ${userId}`);
+  
   // Get student's current level
   const student = await Student.findOne({ user: userId });
-  if (!student || !student.currentLevel) {
+  
+  if (!student) {
+    logger.debug(`[getStudentProgress] No student profile found for user: ${userId}`);
     return {
       totalCompleted: 0,
       totalInCurrentLevel: 0,
       progressPercentage: 0,
-      currentLevel: student?.currentLevel || null,
+      currentLevel: null,
       completedLessons: []
     };
   }
 
-  // Get all lessons in the student's CURRENT level only
+  logger.debug(`[getStudentProgress] Student found with currentLevel: ${student.currentLevel}`);
+
+  // Get ALL completed lessons for this user (not just current level)
+  const allCompletedProgress = await LessonProgress.find({
+    user: userId,
+    isCompleted: true
+  })
+  .populate('lesson', 'title slug difficulty')
+  .sort({ completedAt: -1 });
+
+  logger.debug(`[getStudentProgress] Total completed lessons found: ${allCompletedProgress.length}`);
+
+  // If student hasn't selected a level yet, still return their completed lessons
+  if (!student.currentLevel) {
+    logger.debug(`[getStudentProgress] Student has no currentLevel set`);
+    return {
+      totalCompleted: allCompletedProgress.length,
+      totalInCurrentLevel: 0,
+      progressPercentage: 0,
+      currentLevel: null,
+      completedLessons: allCompletedProgress.map(progress => ({
+        lesson: progress.lesson,
+        completedAt: progress.completedAt,
+        canReview: true
+      }))
+    };
+  }
+
+  // Get all lessons in the student's CURRENT level for progress percentage calculation
   const lessonsInCurrentLevel = await Lesson.find({
     difficulty: student.currentLevel,
     isPublished: true,
@@ -219,27 +254,27 @@ const getStudentProgress = async (userId: string) => {
   });
 
   const totalInCurrentLevel = lessonsInCurrentLevel.length;
+  const currentLevelLessonIds = lessonsInCurrentLevel.map(l => l._id.toString());
 
-  // Get completed lessons for the CURRENT level only
-  const completedInCurrentLevel = await LessonProgress.find({
-    user: userId,
-    isCompleted: true,
-    lesson: { $in: lessonsInCurrentLevel.map(l => l._id) }
-  })
-  .populate('lesson', 'title slug difficulty')
-  .sort({ completedAt: -1 });
+  // Count completed lessons in the current level
+  const completedInCurrentLevelCount = allCompletedProgress.filter(
+    progress => progress.lesson && currentLevelLessonIds.includes((progress.lesson as any)._id?.toString())
+  ).length;
 
-  const totalCompleted = completedInCurrentLevel.length;
   const progressPercentage = totalInCurrentLevel > 0 
-    ? Math.round((totalCompleted / totalInCurrentLevel) * 100) 
+    ? Math.round((completedInCurrentLevelCount / totalInCurrentLevel) * 100) 
     : 0;
+
+  logger.debug(`[getStudentProgress] Current level progress: ${completedInCurrentLevelCount}/${totalInCurrentLevel} (${progressPercentage}%)`);
+  logger.debug(`[getStudentProgress] Returning ${allCompletedProgress.length} completed lessons`);
   
   return {
-    totalCompleted,
+    totalCompleted: allCompletedProgress.length,
     totalInCurrentLevel,
-    progressPercentage, // e.g., 100% if 1/1 completed
+    completedInCurrentLevel: completedInCurrentLevelCount,
+    progressPercentage,
     currentLevel: student.currentLevel,
-    completedLessons: completedInCurrentLevel.map(progress => ({
+    completedLessons: allCompletedProgress.map(progress => ({
       lesson: progress.lesson,
       completedAt: progress.completedAt,
       canReview: true

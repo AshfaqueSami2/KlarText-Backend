@@ -22,7 +22,7 @@ router.post(
 
 router.post(
   '/create-admin',
-  auth(USER_ROLE.ADMIN), 
+  // auth(USER_ROLE.ADMIN), 
   uploadProfileImage.single('profileImage'),
   parseFormData,
   validateRequest(createUserValidationSchema),

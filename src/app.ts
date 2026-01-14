@@ -74,10 +74,17 @@ const allowedOrigins = [
   config.client_url,
 ].filter(Boolean);
 
+// Payment callback paths that should bypass strict CORS (SSLCommerz redirects have null origin)
+const paymentCallbackPaths = ['/api/v1/payment/success', '/api/v1/payment/fail', '/api/v1/payment/cancel', '/api/v1/payment/ipn'];
+
 app.use(cors({
   origin: (origin, callback) => {
-    console.log('CORS origin check:', origin, 'Allowed:', allowedOrigins);
-    if (!origin || allowedOrigins.some(allowed => allowed?.replace(/\/$/, '') === origin?.replace(/\/$/, ''))) {
+    console.log('CORS origin check:', origin, 'Type:', typeof origin, 'Allowed:', allowedOrigins);
+    // Allow requests with no origin (server-to-server, redirects, same-origin)
+    // Also handle "null" string which can occur during redirects
+    if (!origin || origin === 'null') {
+      callback(null, true);
+    } else if (allowedOrigins.some(allowed => allowed?.replace(/\/$/, '') === origin?.replace(/\/$/, ''))) {
       callback(null, true);
     } else {
       console.error('CORS blocked origin:', origin);
