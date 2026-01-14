@@ -110,7 +110,19 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Health check
+// Root
+app.get('/', (_req: Request, res: Response) => {
+  res.json({
+    success: true,
+    message: 'KlarText API',
+    version: '1.0.0',
+  });
+});
+
+// API routes
+app.use('/api/v1', router);
+
+// Health check (also available under /api/v1)
 app.get('/health', async (_req: Request, res: Response) => {
   const { getDatabaseStatus } = await import('./app/config/database');
   const dbStatus = getDatabaseStatus();
@@ -123,17 +135,17 @@ app.get('/health', async (_req: Request, res: Response) => {
   });
 });
 
-// Root
-app.get('/', (_req: Request, res: Response) => {
+app.get('/api/v1/health', async (_req: Request, res: Response) => {
+  const { getDatabaseStatus } = await import('./app/config/database');
+  const dbStatus = getDatabaseStatus();
   res.json({
     success: true,
-    message: 'KlarText API',
-    version: '1.0.0',
+    message: 'KlarText API is healthy',
+    environment: config.env,
+    database: dbStatus.state,
+    uptime: Math.floor(process.uptime()),
   });
 });
-
-// API routes
-app.use('/api/v1', router);
 
 // Error handling
 app.use(globalErrorHandler);
