@@ -1,11 +1,17 @@
 import dotenv from 'dotenv';
 import path from 'path';
+import fs from 'fs';
 
 // Load environment-specific configuration
 const nodeEnv = process.env.NODE_ENV || 'development';
 const envFile = nodeEnv === 'production' ? '.env.production' : '.env.development';
+const envPath = path.join(process.cwd(), envFile);
 
-dotenv.config({ path: path.join(process.cwd(), envFile) });
+// Only load .env file if it exists (for local development)
+// In production (Azure), environment variables come from App Settings
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 export default {
   port: process.env.PORT,
