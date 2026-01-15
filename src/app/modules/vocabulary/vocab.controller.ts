@@ -32,7 +32,7 @@ const getMyVocab = async (req: Request, res: Response) => {
 
 const deleteVocab = async (req: Request, res: Response) => {
   const userId = req.user?.userId as string;
-  const vocabId = req.params.vocabId;
+  const vocabId = req.params.vocabId as string;
   
   await VocabServices.deleteVocabFromDB(vocabId, userId);
 
