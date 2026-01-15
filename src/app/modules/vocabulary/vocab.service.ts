@@ -1,6 +1,7 @@
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../../Error/AppError';
 import { Lesson } from '../lesson/lesson.model';
+import { StreakServices } from '../streak/streak.service';
 import { IVocab } from './vocab.interface';
 import { Vocab } from './vocab.model';
 
@@ -38,6 +39,13 @@ const addVocabToDB = async (payload: IVocab) => {
     }, 
     { upsert: true }
   );
+
+  // 🔥 Record streak activity when saving vocabulary
+  try {
+    await StreakServices.recordActivity(payload.user.toString());
+  } catch (error) {
+    // Non-critical - don't fail vocab save if streak fails
+  }
   
   return result;
 };
@@ -51,7 +59,20 @@ const getMyVocabFromDB = async (userId: string) => {
   return result;
 };
 
+// 3. Delete Vocabulary
+const deleteVocabFromDB = async (vocabId: string, userId: string) => {
+  // Only delete if the vocab belongs to the user (security check)
+  const result = await Vocab.findOneAndDelete({ _id: vocabId, user: userId });
+  
+  if (!result) {
+    throw new AppError(StatusCodes.NOT_FOUND, "Vocabulary word not found or you don't have permission to delete it.");
+  }
+  
+  return result;
+};
+
 export const VocabServices = {
   addVocabToDB,
   getMyVocabFromDB,
+  deleteVocabFromDB,
 };

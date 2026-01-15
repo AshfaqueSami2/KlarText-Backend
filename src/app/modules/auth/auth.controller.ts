@@ -79,9 +79,47 @@ const googleFailure = (req: Request, res: Response) => {
   res.redirect(`${config.client_url}/auth/error?message=Google authentication failed`);
 };
 
+// 🔐 Change Password (for manual signup users)
+const changePassword = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId as string;
+    const { currentPassword, newPassword } = req.body;
+
+    const result = await AuthServices.changePassword(userId, currentPassword, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: null,
+    });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
+// 🔐 Set Password (for Google OAuth users)
+const setPassword = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId as string;
+    const { newPassword } = req.body;
+
+    const result = await AuthServices.setPassword(userId, newPassword);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+      data: null,
+    });
+  } catch (err: any) {
+    res.status(400).json({ success: false, message: err.message });
+  }
+};
+
 export const AuthControllers = {
   loginUser,
   logoutUser,
   googleCallback,
   googleFailure,
+  changePassword,
+  setPassword,
 };

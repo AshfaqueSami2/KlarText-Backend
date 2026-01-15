@@ -93,7 +93,7 @@ const createGoogleStudent = async (payload: any, googleId: string) => {
     ...payload,
     password: undefined, // No password for Google users
     googleId: googleId,
-    needsPasswordChange: false, // Google users don't need password change
+    needsPasswordChange: true, // Google users need to set a password
   };
 
   // Call your existing createStudentIntoDB with modification

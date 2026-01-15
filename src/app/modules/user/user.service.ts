@@ -15,10 +15,11 @@ const createStudentIntoDB = async (payload: TCreateUserPayload & { googleId?: st
   if (payload.googleId) {
     // Google OAuth user - no password needed
     userData.googleId = payload.googleId;
-    userData.needsPasswordChange = false;
+    userData.needsPasswordChange = true;
   } else {
     // Regular user - set password
     userData.password = payload.password || (config.default_pass as string);
+    userData.needsPasswordChange = false;
   }
   
   userData.role = USER_ROLE.STUDENT;
@@ -59,7 +60,7 @@ const createStudentIntoDB = async (payload: TCreateUserPayload & { googleId?: st
       currentLevel: payload.currentLevel ?? null,
       coins: 50, // 🎉 Welcome bonus for all new students!
       isDeleted: false,
-      needsPasswordChange: payload.googleId ? false : true,
+      needsPasswordChange: payload.googleId ? true : false,
     };
 
     // create student inside transaction

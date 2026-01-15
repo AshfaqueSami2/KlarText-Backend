@@ -2,6 +2,8 @@ import express from 'express';
 import { AuthControllers } from './auth.controller';
 import validateRequest from '../../middleWares/validateRequest';
 import { AuthValidation } from './auth.validation';
+import { auth } from '../../middleWares/auth';
+import { USER_ROLE } from '../user/user.constant';
 import passport from '../../config/passport';
 
 const router = express.Router();
@@ -15,6 +17,22 @@ router.post(
 router.post(
   '/logout',
   AuthControllers.logoutUser,
+);
+
+// 🔐 Change Password (for manual signup users - requires current password)
+router.post(
+  '/change-password',
+  auth(USER_ROLE.STUDENT, USER_ROLE.ADMIN),
+  validateRequest(AuthValidation.changePasswordSchema),
+  AuthControllers.changePassword
+);
+
+// 🔐 Set Password (for Google OAuth users - first time password setup)
+router.post(
+  '/set-password',
+  auth(USER_ROLE.STUDENT, USER_ROLE.ADMIN),
+  validateRequest(AuthValidation.setPasswordSchema),
+  AuthControllers.setPassword
 );
 
 // 🆕 Google OAuth Routes

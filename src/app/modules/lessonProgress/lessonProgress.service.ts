@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { LessonProgress } from './lessonProgress.model';
 import { Student } from '../student/student.model';
 import { Lesson } from '../lesson/lesson.model';
+import { StreakServices } from '../streak/streak.service';
 import logger from '../../utils/logger';
 
 // 1. Define the Hierarchy (A1 is lowest, C2 is highest)
@@ -94,10 +95,20 @@ const markLessonAsComplete = async (userId: string, lessonId: string) => {
     logger.debug(`[markLessonAsComplete] Transaction committed successfully for user: ${userId}, lesson: ${lessonId}`);
     await session.endSession();
 
+    // 🔥 Record streak activity (outside transaction - non-critical)
+    let streakInfo = null;
+    try {
+      streakInfo = await StreakServices.recordActivity(userId);
+      logger.debug(`[markLessonAsComplete] Streak updated: ${streakInfo.currentStreak} days`);
+    } catch (streakError) {
+      logger.warn(`[markLessonAsComplete] Failed to update streak:`, streakError);
+    }
+
     return { 
       message: "Lesson Completed", 
       awardedCoins: 10,
       newBalance: updatedStudent!.coins,
+      streak: streakInfo,
       ...levelPromotion // Include promotion info if any
     };
 

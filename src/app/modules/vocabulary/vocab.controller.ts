@@ -30,4 +30,18 @@ const getMyVocab = async (req: Request, res: Response) => {
   });
 };
 
-export const VocabControllers = { addVocab, getMyVocab };
+const deleteVocab = async (req: Request, res: Response) => {
+  const userId = req.user?.userId as string;
+  const vocabId = req.params.vocabId;
+  
+  await VocabServices.deleteVocabFromDB(vocabId, userId);
+
+  sendResponse(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Word removed from your vocabulary!',
+    data: null,
+  });
+};
+
+export const VocabControllers = { addVocab, getMyVocab, deleteVocab };

@@ -10,6 +10,7 @@ import { TranslationRoutes } from '../modules/translation/translation.route';
 import { TTSRoutes } from '../modules/textToS/tts.route';
 import { SubscriptionRoutes } from '../modules/subscription/subscription.route';
 import { PaymentRoutes } from '../modules/payment/payment.route';
+import { StreakRoutes } from '../modules/streak/streak.route';
 
 
 
@@ -60,6 +61,10 @@ const moduleRoutes = [
     {
         path:'/payment',
         route:PaymentRoutes,
+    },
+    {
+        path:'/streak',
+        route:StreakRoutes,
     },
 ]
 

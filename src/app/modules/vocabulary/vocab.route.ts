@@ -23,4 +23,11 @@ router.get(
   VocabControllers.getMyVocab
 );
 
+// Delete a vocabulary word
+router.delete(
+  '/:vocabId',
+  auth(USER_ROLE.STUDENT),
+  VocabControllers.deleteVocab
+);
+
 export const VocabRoutes = router;
